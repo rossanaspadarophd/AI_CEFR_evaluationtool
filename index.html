@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEFR Compliance Evaluation Model for AI-powered tools in language education</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #4a5568;
+            margin-bottom: 15px;
+            font-size: 2.2em;
+            font-weight: 600;
+        }
+
+        .disclaimer {
+            background: #f7fafc;
+            border-left: 4px solid #4299e1;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 0.9em;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transform: translateY(0);
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .section-letter {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.4em;
+            margin-right: 20px;
+        }
+
+        .section-title {
+            flex: 1;
+        }
+
+        .section-title h3 {
+            color: #2d3748;
+            font-size: 1.4em;
+            margin-bottom: 5px;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-minimally { background: #fed7d7; color: #c53030; }
+        .status-partially { background: #fef5e7; color: #d69e2e; }
+        .status-achieved { background: #c6f6d5; color: #38a169; }
+        .status-mostly { background: #bee3f8; color: #3182ce; }
+
+        .question {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 3px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .question:hover {
+            border-left-color: #4299e1;
+            background: #ebf8ff;
+        }
+
+        .question-text {
+            font-weight: 500;
+            margin-bottom: 15px;
+            color: #2d3748;
+        }
+
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .option {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .option input[type="radio"] {
+            display: none;
+        }
+
+        .option label {
+            display: block;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        .option label:hover {
+            border-color: #4299e1;
+            background: #ebf8ff;
+        }
+
+        .option input[type="radio"]:checked + label {
+            border-color: #3182ce;
+            background: #3182ce;
+            color: white;
+        }
+
+        .resource-link {
+            margin-top: 10px;
+            font-size: 0.85em;
+            color: #4299e1;
+            text-decoration: none;
+        }
+
+        .resource-link:hover {
+            text-decoration: underline;
+        }
+
+        .results {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 30px 0;
+        }
+
+        .export-section {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(66, 153, 225, 0.4);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4299e1, #3182ce);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .detailed-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .result-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid #4299e1;
+        }
+
+        .result-card h4 {
+            margin-bottom: 15px;
+            color: #2d3748;
+        }
+
+        .score-display {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .score-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2d3748;
+        }
+
+        .progress-mini {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-mini-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .questions-answered {
+            font-size: 0.9em;
+            color: #718096;
+            margin: 10px 0 0 0;
+        }
+
+        .overall-summary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .overall-score {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin: 15px 0;
+        }
+
+        .overall-number {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+
+        .references {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .references h2 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .reference-list {
+            line-height: 1.8;
+        }
+
+        .reference-list p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .reference-list a {
+            color: #4299e1;
+            text-decoration: none;
+        }
+
+        .reference-list a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .options { flex-direction: column; }
+            .option { min-width: auto; }
+            .section-header { flex-direction: column; text-align: center; }
+            .section-letter { margin: 0 0 15px 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 CEFR Compliance Evaluation Model for AI-powered tools in language education</h1>
+            <p>This model helps you evaluate to what extent the AI-powered tool/lesson plan you are using is compliant with the key aspects of the Common European Framework of Reference (CEFR) for languages, with particular regard to the Companion Volume (Council of Europe, 2020). The tool is not intended to be exhaustive or comprehensive.</p>
+            
+            <div class="disclaimer">
+                <h4>📋 Disclaimer & Terms of Use</h4>
+                <p><strong>🔒 Intellectual Property:</strong> This analysis tool and its contents are the exclusive property of <strong>Rossana Spadaro</strong>. All rights reserved. Personal and professional use of the tool is permitted, but reproduction, distribution or modification without written authorisation is prohibited.</p>
+                <br>
+                <p><strong>📞 Contact:</strong> <a href="mailto:rossana.spadaro@phd.unict.it">rossana.spadaro@phd.unict.it</a></p>
+                <p><strong>💡 Feedback:</strong> What suggestions do you have for improving the model? I look forward to hearing from you.</p>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <p id="progressText">0% Complete</p>
+        </div>
+
+        <form id="cefrForm">
+            <!-- Section A -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-letter">A</div>
+                    <div class="section-title">
+                        <h3>Learner's Social Agency</h3>
+                        <p>The CEFR presents the language user/learner as a "social agent", acting in the social world and exerting agency in the learning process.</p>
+                    </div>
+                    <div class="status-badge status-minimally" id="statusA">Not Evaluated</div>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">1. To what extent are the activities focused on the learner's personal knowledge and skills, including language skills?</div>
+                    <div class="options">
+                        <div class="option"><input type="radio" name="a1" value="1" id="a1_1"><label for="a1_1">Not at all</label></div>
+                        <div class="option"><input type="radio" name="a1" value="2" id="a1_2"><label for="a1_2">Not much</label></div>
+                        <div class="option"><input type="radio" name="a1" value="3" id="a1_3"><label for="a1_3">To some extent</label></div>
+                        <div class="option"><input type="radio" name="a1" value="4" id="a1_4"><label for="a1_4">To a limited extent</label></div>
+                        <div class="option"><input type="radio" name="a1" value="5" id="a1_5"><label for="a1_5">To a great extent</label></div>
+                    </div>
+                    <a href="#" class="resource-link">📚 See North et al (2022: 195-196)</a>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">2. To what extent are activities tailored to the learner's personal context and learning style?</div>
+                    <div class="options">
+                        <div class="option"><input type="radio" name="a2" value="1" id="a2_1"><label for="a2_1">Not at all</label></div>
+                        <div class="option"><input type="radio" name="a2" value="2" id="a2_2"><label for="a2_2">Not much</label></div>
+                        <div class="option"><input type="radio" name="a2" value="3" id="a2_3"><label for="a2_3">To some extent</label></div>
+                        <div class="option"><input type="radio" name="a2" value="4" id="a2_4"><label for="a2_4">To a limited extent</label></div>
+                        <div class="option"><input type="radio" name="a2" value="5" id="a2_5"><label for="a2_5">To a great extent</label></div>
+                    </div>
+                    <a href="#" class="resource-link">📚 See North et al (2022: 195-196)</a>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">3. To what extent are activities based on a learner's needs analysis?</div>
+                    <div class="options">
+                        <div class="option"><input type="radio" name="a3" value="1" id="a3_1"><label for="a3_1">Not at all</label></div>
+                        <div class="option"><input type="radio" name="a3" value="2" id="a3_2"><label for="a3_2">Not much</label></div>
+                        <div class="option"><input type="radio" name="a3" value="3" id="a3_3"><label for="a3_3">To some extent</label></div>
+                        <div class="option"><input type="radio" name="a3" value="4" id="a3_4"><label for="a3_4">To a limited extent</label></div>
+                        <div class="option"><input type="radio" name="a3" value="5" id="a3_5"><label for="a3_5">To a great extent</label></div>
+                    </div>
+                    <a href="#" class="resource-link">📚 See Council of Europe (2020: 28)</a>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">4. To what extent are activities relevant to learner's real-world needs in the public, private, occupational and educational domains?</div>
+                    <div class="options">
+                        <div class="option"><input type="radio" name="a4" value="1" id="a4_1"><label for="a4_1">Not at all</label></div>
+                        <div class="option"><input type="radio" name="a4" value="2" id="a4_2"><label for="a4_2">Not much</label></div>
+                        <div class="option"><input type="radio" name="a4" value="3" id="a4_3"><label for="a4_3">To some extent</label></div>
+                        <div class="option"><input type="radio" name="a4" value="4" id="a4_4"><label for="a4_4">To a limited extent</label></div>
+                        <div class="option"><input type="radio" name="a4" value="5" id="a4_5"><label for="a4_5">To a great extent</label></div>
+                    </div>
+                    <a href="#" class="resource-link">📚 See Council of Europe (2020: 44)</a>
+                </div>
+            </div>
+
+            <!-- Section B -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-letter">B</div>
+                    <div class="section-title">
+                        <h3>Action-oriented Approach</h3>
+                        <p>The action-oriented approach implies purposeful, collaborative tasks in the classroom, the primary focus of which is not language.</p>
+                    </div>
+                    <div class="status-badge status-achieved" id="statusB">Not Evaluated</div>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">1. To what extent is the task authentic, and is it linked to a problem or a global simulation / project?</div>
+                    <div class="options">
+                        <div class="option"><input type="radio" name="b1" value="1" id="b1_1"><label for="b1_1">Not at all</label></div>
+                        <div class="option"><input type="radio" name="b1" value="2" id="b1_2"><label for="b1_2">Not much</label></div>
+                        <div class="option"><input type="radio" name="b1" value="3" id="b1_3"><label for="b1_3">To some extent</label></div>
+                        <div class="option"><input type="radio" name="b1" value="4" id="b1_4"><label for="b1_4">To a limited extent</label></div>
+                        <div class="option"><input type="radio" name="b1" value="5" id="b1_5"><label for="b1_5">To a great extent</label></div>
+                    </div>
+                    <a href="https://cdn.ecml.at/ECML/6mtp-toolbox/Mod3_3.3.VITbox_AoA_checklist_EN_2023_10_12_DN.pdf" target="_blank" class="resource-link">📚 See Fischer et al (2023)</a>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">2. To what extent are the individual steps that learners must take to complete the task presented in a clear and structured way with clearly defined roles?</div>
+                    <div class="options">
+                        <div class="option"><input type="radio" name="b2" value="1" id="b2_1"><label for="b2_1">Not at all</label></div>
+                        <div class="option"><input type="radio" name="b2" value="2" id="b2_2"><label for="b2_2">Not much</label></div>
+                        <div class="option"><input type="radio" name="b2" value="3" id="b2_3"><label for="b2_3">To some extent</label></div>
+                        <div class="option"><input type="radio" name="b2" value="4" id="b2_4"><label for="b2_4">To a limited extent</label></div>
+                        <div class="option"><input type="radio" name="b2" value="5" id="b2_5"><label for="b2_5">To a great extent</label></div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">3. To what extent is the material available sufficient, given that the learners can use their own background knowledge?</div>
+                    <div class="options">
+                        <div class="option"><input type="radio" name="b3" value="1" id="b3_1"><label for="b3_1">Not at all</label></div>
+                        <div class="option"><input type="radio" name="b3" value="2" id="b3_2"><label for="b3_2">Not much</label></div>
+                        <div class="option"><input type="radio" name="b3" value="3" id="b3_3"><label for="b3_3">To some extent</label></div>
+                        <div class="option"><input type="radio" name="b3" value="4" id="b3_4"><label for="b3_4">To a limited extent</label></div>
+                        <div class="option"><input type="radio" name="b3" value="5" id="b3_5"><label for="b3_5">To a great extent</label></div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">4. To what extent is the task primarily focused on developing or presenting the product or outcome rather than the language itself?</div>
+                    <div class="options">
+                        <div class="option"><input type="radio" name="b4" value="1" id="b4_1"><label for="b4_1">Not at all</label></div>
+                        <div class="option"><input type="radio" name="b4" value="2" id="b4_2"><label for="b4_2">Not much</label></div>
+                        <div class="option"><input type="radio" name="b4" value="3" id="b4_3"><label for="b4_3">To some extent</label></div>
+                        <div class="option"><input type="radio" name="b4" value="4" id="b4_4"><label for="b4_4">To a limited extent</label></div>
+                        <div class="option"><input type="radio" name="b4" value="5" id="b4_5"><label for="b4_5">To a great extent</label></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section C -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-letter">C</div>
+                    <div class="section-title">
+                        <h3>Proficiency Perspective</h3>
+                        <p>One of the main principles of the CEFR is the promotion of the positive formulation of educational aims and outcomes at all levels.</p>
+                    </div>
+                    <div class="status-badge status-achieved" id="statusC">Not Evaluated</div>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">1. To what extent are the educational aims and outcomes positively formulated?</div>
+                    <div class="options">
+                        <div class="option"><input type="radio" name="c1" value="1" id="c1_1"><label for="c1_1">Not at all</label></div>
+                        <div class="option"><input type="radio" name="c1" value="2" id="c1_2"><label for="c1_2">Not much</label></div>
+                        <div class="option"><input type="radio" name="c1" value="3" id="c1_3"><label for="c1_3">To some extent</label></div>
+                        <div class="option"><input type="radio" name="c1" value="4" id="c1_4"><label for="c1_4">To a limited extent</label></div>
+                        <div class="option"><input type="radio" name="c1" value="5" id="c1_5"><label for="c1_5">To a great extent</label></div>
+                    </div>
+                    <a href="#" class="resource-link">📚 See Council of Europe (2020: 27)</a>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">2. To what extent is the acquisition of proficiency seen as a circular process?</div>
+                    <div class="options">
+                        <div class="option"><input type="radio" name="c2" value="1" id="c2_1"><label for="c2_1">Not at all</label></div>
+                        <div class="option"><input type="radio" name="c2" value="2" id="c2_2"><label for="c2_2">Not much</label></div>
+                        <div class="option"><input type="radio" name="c2" value="3" id="c2_3"><label for="c2_3">To some extent</label></div>
+                        <div class="option"><input type="radio" name="c2" value="4" id="c2_4"><label for="c2_4">To a limited extent</label></div>
+                        <div class="option"><input type="radio" name="c2" value="5" id="c2_5"><label for="c2_5">To a great extent</label></div>
+                    </div>
+                    <a href="#" class="resource-link">📚 See Council of Europe (2020: 34)</a>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">3. To what extent is there an alignment between curriculum, teaching and assessment obtained by planning backwards from learners' real-life communicative needs?</div>
+                    <div class="options">
+                        <div class="option"><input type="radio" name="c3" value="1" id="c3_1"><label for="c3_1">Not at all</label></div>
+                        <div class="option"><input type="radio" name="c3" value="2" id="c3_2"><label for="c3_2">Not much</label></div>
+                        <div class="option"><input type="radio" name="c3" value="3" id="c3_3"><label for="c3_3">To some extent</label></div>
+                        <div class="option"><input type="radio" name="c3" value="4" id="c3_4"><label for="c3_4">To a limited extent</label></div>
+                        <div class="option"><input type="radio" name="c3" value="5" id="c3_5"><label for="c3_5">To a great extent</label></div>
+                    </div>
+                    <a href="#" class="resource-link">📚 See Council of Europe (2020: 29, 42)</a>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">4. To what extent could 'can-do' descriptors be useful as a starting point for providing transparent criteria for assessment?</div>
+                    <div class="options">
+                        <div class="option"><input type="radio" name="c4" value="1" id="c4_1"><label for="c4_1">Not at all</label></div>
+                        <div class="option"><input type="radio" name="c4" value="2" id="c4_2"><label for="c4_2">Not much</label></div>
+                        <div class="option"><input type="radio" name="c4" value="3" id="c4_3"><label for="c4_3">To some extent</label></div>
+                        <div class="option"><input type="radio" name="c4" value="4" id="c4_4"><label for="c4_4">To a limited extent</label></div>
+                        <div class="option"><input type="radio" name="c4" value="5" id="c4_5"><label for="c4_5">To a great extent</label></div>
+                    </div>
+                    <a href="#" class="resource-link">📚 See Council of Europe (2020: 43)</a>
+                </div>
+            </div>
+
+            <!-- Section D -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-letter">D</div>
+                    <div class="section-title">
+                        <h3>Four Modes of Communication</h3>
+                        <p>The CEFR replaces the traditional model of the four skills with four modes of communication: reception, production, interaction and mediation.</p>
+                    </div>
+                    <div class="status-badge status-partially" id="statusD">Not Evaluated</div>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">1. To what extent does the relationship between the four modes of communication represent a move away from the four skills?</div>
+                    <div class="options">
+                        <div class="option"><input type="radio" name="d1" value="1" id="d1_1"><label for="d1_1">Not at all</label></div>
+                        <div class="option"><input type="radio" name="d1" value="2" id="d1_2"><label for="d1_2">Not much</label></div>
+                        <div class="option"><input type="radio" name="d1" value="3" id="d1_3"><label for="d1_3">To some extent</label></div>
+                        <div class="option"><input type="radio" name="d1" value="4" id="d1_4"><label for="d1_4">To a limited extent</label></div>
+                        <div class="option"><input type="radio" name="d1" value="5" id="d1_5"><label for="d1_5">To a great extent</label></div>
+                    </div>
+                    <a href="#" class="resource-link">📚 See Council of Europe (2020: 34-35)</a>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">2. To what extent are interaction activities and strategies involving two or more parties co-constructing discourse taken into account?</div>
+                    <div class="options">
+                        <div class="option"><input type="radio" name="d2" value="1" id="d2_1"><label for="d2_1">Not at all</label></div>
+                        <div class="option"><input type="radio" name="d2" value="2" id="d2_2"><label for="d2_2">Not much</label></div>
+                        <div class="option"><input type="radio" name="d2" value="3" id="d2_3"><label for="d2_3">To some extent</label></div>
+                        <div class="option"><input type="radio" name="d2" value="4" id="d2_4"><label for="d2_4">To a limited extent</label></div>
+                        <div class="option"><input type="radio" name="d2" value="5" id="d2_5"><label for="d2_5">To a great extent</label></div>
+                    </div>
+                    <a href="#" class="resource-link">📚 See Council of Europe (2020: 71)</a>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">3. To what extent are mediation activities and strategies (a combination of reception, production and interaction) taken into account?</div>
+                    <div class="options">
+                        <div class="option"><input type="radio" name="d3" value="1" id="d3_1"><label for="d3_1">Not at all</label></div>
+                        <div class="option"><input type="radio" name="d3" value="2" id="d3_2"><label for="d3_2">Not much</label></div>
+                        <div class="option"><input type="radio" name="d3" value="3" id="d3_3"><label for="d3_3">To some extent</label></div>
+                        <div class="option"><input type="radio" name="d3" value="4" id="d3_4"><label for="d3_4">To a limited extent</label></div>
+                        <div class="option"><input type="radio" name="d3" value="5" id="d3_5"><label for="d3_5">To a great extent</label></div>
+                    </div>
+                    <a href="#" class="resource-link">📚 See Council of Europe (2020: 90)</a>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">4. To what extent are reception and production activities (which make up the traditional four skills when divided into spoken and written) taken into account?</div>
+                    <div class="options">
+                        <div class="option"><input type="radio" name="d4" value="1" id="d4_1"><label for="d4_1">Not at all</label></div>
+                        <div class="option"><input type="radio" name="d4" value="2" id="d4_2"><label for="d4_2">Not much</label></div>
+                        <div class="option"><input type="radio" name="d4" value="3" id="d4_3"><label for="d4_3">To some extent</label></div>
+                        <div class="option"><input type="radio" name="d4" value="4" id="d4_4"><label for="d4_4">To a limited extent</label></div>
+                        <div class="option"><input type="radio" name="d4" value="5" id="d4_5"><label for="d4_5">To a great extent</label></div>
+                    </div>
+                    <a href="#" class="resource-link">📚 See Council of Europe (2020: 34)</a>
+                </div>
+            </div>
+
+            <!-- Section E -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-letter">E</div>
+                    <div class="section-title">
+                        <h3>Plurilingual and Pluricultural Competence</h3>
+                        <p>The plurilingual vision gives value to cultural and linguistic diversity at the level of the individual.</p>
+                    </div>
+                    <div class="status-badge status-mostly" id="statusE">Not Evaluated</div>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">1. To what extent is the myth of the 'native-speaker' overcome in favour of a plurilingual and pluricultural perspective?</div>
+                    <div class="options">
+                        <div class="option"><input type="radio" name="e1" value="1" id="e1_1"><label for="e1_1">Not at all</label></div>
+                        <div class="option"><input type="radio" name="e1" value="2" id="e1_2"><label for="e1_2">Not much</label></div>
+                        <div class="option"><input type="radio" name="e1" value="3" id="e1_3"><label for="e1_3">To some extent</label></div>
+                        <div class="option"><input type="radio" name="e1" value="4" id="e1_4"><label for="e1_4">To a limited extent</label></div>
+                        <div class="option"><input type="radio" name="e1" value="5" id="e1_5"><label for="e1_5">To a great extent</label></div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">2. To what extent do the learners need to draw upon the resources in their linguistic and cultural repertoires in order to accomplish tasks?</div>
+                    <div class="options">
+                        <div class="option"><input type="radio" name="e2" value="1" id="e2_1"><label for="e2_1">Not at all</label></div>
+                        <div class="option"><input type="radio" name="e2" value="2" id="e2_2"><label for="e2_2">Not much</label></div>
+                        <div class="option"><input type="radio" name="e2" value="3" id="e2_3"><label for="e2_3">To some extent</label></div>
+                        <div class="option"><input type="radio" name="e2" value="4" id="e2_4"><label for="e2_4">To a limited extent</label></div>
+                        <div class="option"><input type="radio" name="e2" value="5" id="e2_5"><label for="e2_5">To a great extent</label></div>
+                    </div>
+                    <a href="#" class="resource-link">📚 See Council of Europe (2020: 30)</a>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">3. To what extent is the linguistic and cultural diversity of the learners valued instead of being considered a barrier?</div>
+                    <div class="options">
+                        <div class="option"><input type="radio" name="e3" value="1" id="e3_1"><label for="e3_1">Not at all</label></div>
+                        <div class="option"><input type="radio" name="e3" value="2" id="e3_2"><label for="e3_2">Not much</label></div>
+                        <div class="option"><input type="radio" name="e3" value="3" id="e3_3"><label for="e3_3">To some extent</label></div>
+                        <div class="option"><input type="radio" name="e3" value="4" id="e3_4"><label for="e3_4">To a limited extent</label></div>
+                        <div class="option"><input type="radio" name="e3" value="5" id="e3_5"><label for="e3_5">To a great extent</label></div>
+                    </div>
+                    <a href="#" class="resource-link">📚 See Council of Europe (2020: 123)</a>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">4. To what extent is plurilingual and pluricultural competence taken into account?</div>
+                    <div class="options">
+                        <div class="option"><input type="radio" name="e4" value="1" id="e4_1"><label for="e4_1">Not at all</label></div>
+                        <div class="option"><input type="radio" name="e4" value="2" id="e4_2"><label for="e4_2">Not much</label></div>
+                        <div class="option"><input type="radio" name="e4" value="3" id="e4_3"><label for="e4_3">To some extent</label></div>
+                        <div class="option"><input type="radio" name="e4" value="4" id="e4_4"><label for="e4_4">To a limited extent</label></div>
+                        <div class="option"><input type="radio" name="e4" value="5" id="e4_5"><label for="e4_5">To a great extent</label></div>
+                    </div>
+                    <a href="#" class="resource-link">📚 See Council of Europe (2020: 123)</a>
+                </div>
+            </div>
+        </form>
+
+        <div class="results" id="results">
+            <h2>📊 Evaluation Results</h2>
+            <p>Complete the evaluation above to see your CEFR compliance results and detailed analysis.</p>
+            
+            <div class="chart-container">
+                <canvas id="resultsChart"></canvas>
+            </div>
+            
+            <div id="detailedResults"></div>
+            
+            <div class="export-section">
+                <button class="btn" onclick="exportToPDF()">📄 Export to PDF</button>
+                <button class="btn" onclick="exportToExcel()">📊 Export to Excel</button>
+                <button class="btn" onclick="resetForm()">🔄 Reset Form</button>
+            </div>
+        </div>
+
+        <!-- References Section -->
+        <div class="references">
+            <h2>📚 References</h2>
+            <div class="reference-list">
+                <p>Council of Europe. (2020). <em>Common European Framework of Reference for Languages: Learning, teaching, assessment: Companion volume</em>. <a href="http://www.coe.int/lang-cefr" target="_blank">www.coe.int/lang-cefr</a></p>
+                
+                <p>Fischer, J., Rouveyrol, L., Sawicka, B., & Zabala-Delgado, J. (2023). <em>CEFR Companion Volume implementation toolbox</em>. Council of Europe, European Centre for Modern Languages. <a href="https://www.ecml.at/companionvolumetoolbox" target="_blank">https://www.ecml.at/companionvolumetoolbox</a></p>
+                
+                <p>North, B., Piccardo, E., Goodier, T., Fasoglio, D., Margonis, R., & Rüschoff, B. (2022). <em>Enriching 21st century language education: The CEFR Companion Volume, examples from practice</em>. Council of Europe Publishing.</p>
+                
+                <p>Piccardo, E., Berchoud, M., Cignatta, T., Mentz, O., & Pamula, M. (2011). <em>Pathways through assessing, learning and teaching in the CEFR</em>. Council of Europe Publishing.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chart = null;
+
+        // Initialize form listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('cefrForm');
+            const inputs = form.querySelectorAll('input[type="radio"]');
+            
+            inputs.forEach(input => {
+                input.addEventListener('change', updateResults);
+            });
+            
+            // Reset status badges
+            resetStatusBadges();
+        });
+
+        function updateResults() {
+            const sections = ['a', 'b', 'c', 'd', 'e'];
+            const sectionNames = [
+                "Learner's Social Agency",
+                "Action-oriented Approach", 
+                "Proficiency Perspective",
+                "Four Modes of Communication",
+                "Plurilingual and Pluricultural Competence"
+            ];
+            
+            let results = {};
+            let totalAnswered = 0;
+            let totalQuestions = 20;
+            
+            sections.forEach((section, sectionIndex) => {
+                let scores = [];
+                let answered = 0;
+                
+                for (let q = 1; q <= 4; q++) {
+                    const name = section + q;
+                    const selected = document.querySelector(`input[name="${name}"]:checked`);
+                    if (selected) {
+                        scores.push(parseInt(selected.value));
+                        answered++;
+                        totalAnswered++;
+                    }
+                }
+                
+                if (scores.length > 0) {
+                    const average = scores.reduce((a, b) => a + b, 0) / scores.length;
+                    const status = getStatus(average);
+                    
+                    results[section] = {
+                        name: sectionNames[sectionIndex],
+                        average: average,
+                        status: status,
+                        scores: scores,
+                        answered: answered
+                    };
+                    
+                    updateStatusBadge(section, status);
+                } else {
+                    results[section] = {
+                        name: sectionNames[sectionIndex],
+                        average: 0,
+                        status: 'Not Evaluated',
+                        scores: [],
+                        answered: 0
+                    };
+                    
+                    updateStatusBadge(section, 'Not Evaluated');
+                }
+            });
+            
+            // Update progress
+            const progress = (totalAnswered / totalQuestions) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = Math.round(progress) + '% Complete';
+            
+            // Update chart and detailed results
+            updateChart(results);
+            updateDetailedResults(results);
+        }
+
+        function getStatus(average) {
+            if (average >= 4.5) return 'Mostly achieved';
+            if (average >= 3.5) return 'Achieved';
+            if (average >= 2.5) return 'Partially achieved';
+            if (average >= 1.5) return 'Minimally achieved';
+            return 'Not achieved';
+        }
+
+        function updateStatusBadge(section, status) {
+            const badge = document.getElementById('status' + section.toUpperCase());
+            badge.textContent = status;
+            badge.className = 'status-badge';
+            
+            switch(status) {
+                case 'Mostly achieved':
+                    badge.classList.add('status-mostly');
+                    break;
+                case 'Achieved':
+                    badge.classList.add('status-achieved');
+                    break;
+                case 'Partially achieved':
+                    badge.classList.add('status-partially');
+                    break;
+                case 'Minimally achieved':
+                    badge.classList.add('status-minimally');
+                    break;
+                default:
+                    badge.classList.add('status-minimally');
+            }
+        }
+
+        function resetStatusBadges() {
+            ['A', 'B', 'C', 'D', 'E'].forEach(letter => {
+                updateStatusBadge(letter.toLowerCase(), 'Not Evaluated');
+            });
+        }
+
+        function updateChart(results) {
+            const ctx = document.getElementById('resultsChart').getContext('2d');
+            
+            const labels = Object.values(results).map(r => r.name);
+            const data = Object.values(results).map(r => r.average);
+            const colors = Object.values(results).map(r => getStatusColor(r.status));
+            
+            if (chart) {
+                chart.destroy();
+            }
+            
+            chart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'CEFR Compliance Score',
+                        data: data,
+                        borderColor: '#4299e1',
+                        backgroundColor: 'rgba(66, 153, 225, 0.2)',
+                        borderWidth: 3,
+                        pointBackgroundColor: colors,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 5,
+                            ticks: {
+                                stepSize: 1,
+                                font: {
+                                    size: 12
+                                }
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function getStatusColor(status) {
+            switch(status) {
+                case 'Mostly achieved': return '#3182ce';
+                case 'Achieved': return '#38a169';
+                case 'Partially achieved': return '#d69e2e';
+                case 'Minimally achieved': return '#c53030';
+                default: return '#e2e8f0';
+            }
+        }
+
+        function updateDetailedResults(results) {
+            const detailedDiv = document.getElementById('detailedResults');
+            
+            if (Object.values(results).every(r => r.answered === 0)) {
+                detailedDiv.innerHTML = '<p>Complete the evaluation to see detailed results.</p>';
+                return;
+            }
+            
+            let html = '<h3>📈 Detailed Analysis</h3><div class="detailed-grid">';
+            
+            Object.entries(results).forEach(([key, result]) => {
+                if (result.answered > 0) {
+                    html += `
+                        <div class="result-card">
+                            <h4>${key.toUpperCase()}. ${result.name}</h4>
+                            <div class="score-display">
+                                <span class="score-number">${result.average.toFixed(1)}/5.0</span>
+                                <span class="status-badge status-${result.status.toLowerCase().replace(' ', '-')}">${result.status}</span>
+                            </div>
+                            <div class="progress-mini">
+                                <div class="progress-mini-fill" style="width: ${(result.average/5)*100}%; background: ${getStatusColor(result.status)};"></div>
+                            </div>
+                            <p class="questions-answered">${result.answered}/4 questions answered</p>
+                        </div>
+                    `;
+                }
+            });
+            
+            html += '</div>';
+            
+            // Add overall summary
+            const answeredSections = Object.values(results).filter(r => r.answered > 0);
+            if (answeredSections.length > 0) {
+                const overallAverage = answeredSections.reduce((sum, r) => sum + r.average, 0) / answeredSections.length;
+                const overallStatus = getStatus(overallAverage);
+                
+                html += `
+                    <div class="overall-summary">
+                        <h3>🎯 Overall CEFR Compliance</h3>
+                        <div class="overall-score">
+                            <span class="overall-number">${overallAverage.toFixed(1)}/5.0</span>
+                            <span class="status-badge status-${overallStatus.toLowerCase().replace(' ', '-')}">${overallStatus}</span>
+                        </div>
+                        <p>Based on ${answeredSections.length} completed section(s)</p>
+                    </div>
+                `;
+            }
+            
+            detailedDiv.innerHTML = html;
+        }
+
+        function exportToPDF() {
+            // Simple HTML to PDF export
+            const printWindow = window.open('', '_blank');
+            const results = document.getElementById('results').innerHTML;
+            
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>CEFR Evaluation Results</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            .status-badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+                            .status-achieved { background: #c6f6d5; color: #38a169; }
+                            .status-mostly { background: #bee3f8; color: #3182ce; }
+                            .status-partially { background: #fef5e7; color: #d69e2e; }
+                            .status-minimally { background: #fed7d7; color: #c53030; }
+                            .chart-container { display: none; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>CEFR Compliance Evaluation Results</h1>
+                        <p>Generated on: ${new Date().toLocaleDateString()}</p>
+                        ${results}
+                    </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+            setTimeout(() => {
+                printWindow.print();
+            }, 500);
+        }
+
+        function exportToExcel() {
+            const sections = ['a', 'b', 'c', 'd', 'e'];
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Section,Question,Response,Score\n";
+            
+            sections.forEach(section => {
+                for (let q = 1; q <= 4; q++) {
+                    const name = section + q;
+                    const selected = document.querySelector(`input[name="${name}"]:checked`);
+                    if (selected) {
+                        const label = selected.nextElementSibling.textContent;
+                        csvContent += `${section.toUpperCase()},Question ${q},${label},${selected.value}\n`;
+                    }
+                }
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "cefr-evaluation-results.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function resetForm() {
+            document.getElementById('cefrForm').reset();
+            resetStatusBadges();
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('progressText').textContent = '0% Complete';
+            document.getElementById('detailedResults').innerHTML = '<p>Complete the evaluation to see detailed results.</p>';
+            if (chart) {
+                chart.destroy();
+                chart = null;
+            }
+        }
+    </script>
+</body>
+</html>
